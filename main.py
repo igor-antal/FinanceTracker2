@@ -21,13 +21,25 @@ class NewEntryWindow(tk.Toplevel, metaclass=Singleton):
 
     def __init__(self):
         super().__init__()
+        self.geometry("600x600")
+        self.amount_label = tk.Label(self, text="Set amount").pack()
+        self.amount_entry = tk.Entry(self).pack()
+
+        self.entry_type = ttk.Combobox(self)
+        self.entry_type["values"] = ("Income", "Expense")
+        self.entry_type.current(0)
+        self.entry_type.pack()
+
+        self.description_label = tk.Label(self, text="Descripiton").pack()
+        self.description_entry = tk.Entry(self).pack()
 
         self.today = datetime.today().timetuple()[:3]
-        self.geometry("600x600")
         self.calendar = Calendar(self, selectmode="day",
                                  year=self.today[0], month=self.today[1], day=self.today[2], date_pattern="dd-%m-%Y")
         self.calendar.pack()
-        self.calendar.grid(column=1)
+
+
+
 
 
 class App(Tk):
@@ -67,6 +79,7 @@ class App(Tk):
             row_id = self.table.item(selected_entry[0], "values")
             delete_row(row_id[0])
             self.load_table()
+            return
 
     @staticmethod
     def new_entry_window():

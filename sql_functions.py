@@ -42,6 +42,6 @@ def delete_row(row_id):
     cursor = conn.cursor()
     cursor.execute('''
     DELETE FROM finance_entries WHERE id = ?
-    ''', (row_id))
+    ''', (row_id,))
     conn.commit()
     conn.close()
