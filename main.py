@@ -4,7 +4,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from tkcalendar import Calendar
 from sql_functions import fetch_all_data, delete_row, insert_row
-from data_validation import validate_float_input, on_invalid_input, parse_date_to_sql, parse_sql_date
+from data_validation_manipulation import (validate_float_input, on_invalid_input,
+                                          parse_date_to_sql, parse_sql_date)
 
 
 def plot_entries(self):
@@ -129,8 +130,6 @@ class App(Tk):
 
     def new_entry_window(self):
         return NewEntryWindow(self)
-
-
 
 
 if __name__ == "__main__":
