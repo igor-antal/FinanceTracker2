@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from tkcalendar import Calendar
 from sql_functions import fetch_all_data, delete_row, insert_row
-from data_validation import validate_float_input, on_invalid_input
+from data_validation import validate_float_input, on_invalid_input, parse_date_to_sql, parse_sql_date
 
 
 def plot_entries(self):
@@ -67,7 +67,13 @@ class NewEntryWindow(tk.Toplevel, metaclass=Singleton):
         if not self._amount_entry.get():
             messagebox.showinfo(message="Insert amount!", title="No amount")
             return
-        insert_row(self._calendar.get_date(), self._amount_entry.get(),
+        selected_date = self._calendar.get_date()
+        try:
+            parsed_date = parse_date_to_sql(selected_date)
+        except ValueError:
+            print(f"Parsing failed {selected_date}")
+            return
+        insert_row(parsed_date, self._amount_entry.get(),
                    self._entry_type.get(), self._description_entry.get())
         self.main_window.load_table()
         self.destroy()
@@ -101,7 +107,13 @@ class App(Tk):
         for item in self._table.get_children():
             self._table.delete(item)
         for row in fetch_all_data():
-            self._table.insert('', tk.END, values=row)
+            modified_row = list(row)
+            try:
+                modified_row[1] = parse_sql_date(row[1])
+            except ValueError:
+                print(f"Parsing failed {modified_row[1]}")
+                return
+            self._table.insert('', tk.END, values=modified_row)
 
     def delete_entry(self):
         selected_entry = self._table.selection()
