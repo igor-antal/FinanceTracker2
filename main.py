@@ -4,12 +4,9 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from tkcalendar import Calendar
 from sql_functions import fetch_all_data, delete_row, insert_row
-from data_validation_manipulation import (validate_float_input, on_invalid_input,
-                                          parse_date_to_sql, parse_sql_date)
-
-
-def plot_entries(self):
-    pass
+from data_visualization import plot_entries
+from data_validation_parsing import (validate_float_input,
+                                     parse_date_to_sql, parse_sql_date)
 
 
 class Singleton(type):
@@ -32,7 +29,7 @@ class NewEntryWindow(tk.Toplevel, metaclass=Singleton):
         self._amount_label = tk.Label(self, text="Set amount")
         self._amount_label.pack()
         self._validate_float = self.register(validate_float_input)
-        self._invalid_input = self.register(on_invalid_input)
+        self._invalid_input = self.register(NewEntryWindow.invalid_input_msg)
         self._amount_entry = tk.Entry(self, validate="key",
                                       validatecommand=(self._validate_float, "%P"),
                                       invalidcommand=self._invalid_input)
@@ -60,6 +57,10 @@ class NewEntryWindow(tk.Toplevel, metaclass=Singleton):
 
         self._add_entry_button = tk.Button(self, text="Add Entry", command=self.add_entry)
         self._add_entry_button.pack()
+
+    @staticmethod
+    def invalid_input_msg():
+        return messagebox.showinfo(title="Wrong Input", message="Enter only numbers")
 
     def update_date_label(self, event):
         self._date_label.config(text=f"Selected date: {self._calendar.get_date()}")
@@ -92,7 +93,8 @@ class App(Tk):
         self._delete_entry_button.pack()
         self._new_entry_button = Button(self, text="New Entry", command=self.new_entry_window)
         self._new_entry_button.pack()
-        self._plot_entries_button = Button(self, text="Plot Entries", command=plot_entries)
+        self._plot_entries_button = Button(self, text="Plot Entries",
+                                           command=App.try_plotting_entries)
         self._plot_entries_button.pack()
 
         self._table = ttk.Treeview(self, columns=("id", "date", "amount", "type", "description"), show="headings")
@@ -103,6 +105,12 @@ class App(Tk):
         self._table.heading("type", text="Type")
         self._table.heading("description", text="Description")
         self._table.pack()
+
+    @staticmethod
+    def try_plotting_entries():
+        if not plot_entries():
+            messagebox.showinfo(title="No data", message="Nothing to show")
+        return
 
     def load_table(self):
         for item in self._table.get_children():
@@ -136,5 +144,3 @@ if __name__ == "__main__":
     app = App()
     app.load_table()
     app.mainloop()
-
-

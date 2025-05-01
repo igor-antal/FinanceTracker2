@@ -1,14 +1,9 @@
-from tkinter import messagebox
 from datetime import datetime
 
 
 def parse_date_to_sql(date):
-    date = datetime.strptime(date,"%d/%m/%Y")
+    date = datetime.strptime(date, "%d/%m/%Y")
     return datetime.strftime(date, "%Y-%m-%d")
-
-
-def on_invalid_input():
-    return messagebox.showinfo(title="Wrong Input", message="Enter only numbers")
 
 
 def validate_float_input(user_input):
