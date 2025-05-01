@@ -26,51 +26,51 @@ class NewEntryWindow(tk.Toplevel, metaclass=Singleton):
 
         self.main_window = main_window
         self.geometry("600x600")
+        self.transient(main_window)
 
-        self.amount_label = tk.Label(self, text="Set amount")
-        self.amount_label.pack()
-        self.validate_float = self.register(validate_float_input)
-        self.invalid_input = self.register(on_invalid_input)
-        self.amount_entry = tk.Entry(self, validate="key",
-                                     validatecommand=(self.validate_float, "%P"),
-                                     invalidcommand=self.invalid_input)
-        self.amount_entry.pack()
+        self._amount_label = tk.Label(self, text="Set amount")
+        self._amount_label.pack()
+        self._validate_float = self.register(validate_float_input)
+        self._invalid_input = self.register(on_invalid_input)
+        self._amount_entry = tk.Entry(self, validate="key",
+                                      validatecommand=(self._validate_float, "%P"),
+                                      invalidcommand=self._invalid_input)
+        self._amount_entry.pack()
 
-        self.entry_type = ttk.Combobox(self)
-        self.entry_type["values"] = ("Income", "Expense")
-        self.entry_type.current(0)
-        self.entry_type.pack()
+        self._entry_type = ttk.Combobox(self)
+        self._entry_type["values"] = ("Income", "Expense")
+        self._entry_type.current(0)
+        self._entry_type.pack()
 
-        self.description_label = tk.Label(self, text="Descripiton")
-        self.description_label.pack()
-        self.description_entry = tk.Entry(self)
-        self.description_entry.pack()
+        self._description_label = tk.Label(self, text="Description")
+        self._description_label.pack()
+        self._description_entry = tk.Entry(self)
+        self._description_entry.pack()
 
-        self.today = datetime.today().timetuple()[:3]
-        self.calendar = Calendar(self, selectmode="day",
-                                 year=self.today[0], month=self.today[1], day=self.today[2])
-        self.calendar.pack()
-        self.date_label = tk.Label(self, text=f"Selected date: {self.calendar.get_date()}")
-        self.date_label.pack()
-        self.calendar.bind("<<CalendarSelected>>", self.update_date_label)
+        self._today = datetime.today().timetuple()[:3]
+        self._calendar = Calendar(self, selectmode="day",
+                                  year=self._today[0], month=self._today[1], day=self._today[2],
+                                  date_pattern="dd/mm/yyyy")
+        self._calendar.pack()
 
-        self.add_entry_button = tk.Button(self, text="Add Entry", command=self.add_entry)
-        self.add_entry_button.pack()
+        self._date_label = tk.Label(self, text=f"Selected date: {self._calendar.get_date()}")
+        self._date_label.pack()
+        self._calendar.bind("<<CalendarSelected>>", self.update_date_label)
+
+        self._add_entry_button = tk.Button(self, text="Add Entry", command=self.add_entry)
+        self._add_entry_button.pack()
 
     def update_date_label(self, event):
-        self.date_label.config(text=f"Selected date: {self.calendar.get_date()}")
+        self._date_label.config(text=f"Selected date: {self._calendar.get_date()}")
 
     def add_entry(self):
-        insert_row(self.calendar.get_date(), self.amount_entry.get(),
-                   self.entry_type.get(), self.description_entry.get())
+        if not self._amount_entry.get():
+            messagebox.showinfo(message="Insert amount!", title="No amount")
+            return
+        insert_row(self._calendar.get_date(), self._amount_entry.get(),
+                   self._entry_type.get(), self._description_entry.get())
         self.main_window.load_table()
         self.destroy()
-        return
-
-
-
-
-
 
 
 class App(Tk):
@@ -81,33 +81,36 @@ class App(Tk):
         self.geometry("800x600")
         self.config(background="#fff6f2")
 
-        Button(self, text="Delete Entry", command=self.delete_entry).grid(row=0, column=1)
-        Button(self, text="New Entry", command=self.new_entry_window).grid(row=0, column=2)
-        Button(self, text="Plot Entries", command=plot_entries).grid(row=0, column=3)
+        self._delete_entry_button = Button(self, text="Delete Entry", command=self.delete_entry)
+        self._delete_entry_button.pack()
+        self._new_entry_button = Button(self, text="New Entry", command=self.new_entry_window)
+        self._new_entry_button.pack()
+        self._plot_entries_button = Button(self, text="Plot Entries", command=plot_entries)
+        self._plot_entries_button.pack()
 
-        self.table = ttk.Treeview(self, columns=("id", "date", "amount", "type", "description"), show="headings")
-        self.table.column("id", width=0, stretch=tk.NO)
-        self.table.heading("id", text="")
-        self.table.heading("date", text="Date")
-        self.table.heading("amount", text="Amount")
-        self.table.heading("type", text="Type")
-        self.table.heading("description", text="Description")
-        self.table.grid(row=1, column=1, columnspan=3)
+        self._table = ttk.Treeview(self, columns=("id", "date", "amount", "type", "description"), show="headings")
+        self._table.column("id", width=0, stretch=tk.NO)
+        self._table.heading("id", text="")
+        self._table.heading("date", text="Date")
+        self._table.heading("amount", text="Amount")
+        self._table.heading("type", text="Type")
+        self._table.heading("description", text="Description")
+        self._table.pack()
 
     def load_table(self):
-        for item in self.table.get_children():
-            self.table.delete(item)
+        for item in self._table.get_children():
+            self._table.delete(item)
         for row in fetch_all_data():
-            self.table.insert('', tk.END, values=row)
+            self._table.insert('', tk.END, values=row)
 
     def delete_entry(self):
-        selected_entry = self.table.selection()
+        selected_entry = self._table.selection()
         if not selected_entry:
             messagebox.showinfo("Info", "Please select an entry for deletion")
             return
         confirm = messagebox.askyesno("Confirm Delete", "Are you sure you want to delete the selected entry?")
         if confirm:
-            row_id = self.table.item(selected_entry[0], "values")
+            row_id = self._table.item(selected_entry[0], "values")
             delete_row(row_id[0])
             self.load_table()
             return

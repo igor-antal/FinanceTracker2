@@ -20,7 +20,7 @@ def fetch_all_data():
     conn = sqlite3.connect('finance_data.db')
     cursor = conn.cursor()
     cursor.execute('''
-    SELECT * FROM finance_entries;
+    SELECT * FROM finance_entries ORDER BY date(date) ASC;
     ''')
     data = cursor.fetchall()
     conn.close()
