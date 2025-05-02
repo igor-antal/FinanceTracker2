@@ -58,7 +58,6 @@ class NewEntryWindow(tk.Toplevel, metaclass=Singleton):
         self._add_entry_button = tk.Button(self, text="Add Entry", command=self.add_entry)
         self._add_entry_button.pack()
 
-
     @staticmethod
     def invalid_input_msg():
         return messagebox.showinfo(title="Wrong Input", message="Enter only numbers")
@@ -152,7 +151,6 @@ class App(Tk):
             row_id = self._table.item(selected_entry[0], "values")
             delete_row(row_id[0])
             self.update_main_win_data()
-
 
     def new_entry_window(self):
         return NewEntryWindow(self)

@@ -3,7 +3,18 @@ from sql_functions import fetch_all_data
 import matplotlib.pyplot as plt
 
 
-def plot_entries():
+def plot_entries() -> bool:
+    """
+      Plots the daily income and expense amounts over time if there are any entries.
+
+      Fetches all financial entries, preprocesses the data into pandas DataFrames
+      for income and expenses, resamples the data to daily sums, and then
+      generates and displays a line plot.
+
+      :return:
+          bool: True if there was data to plot and the plot was displayed successfully.
+                False if there are no financial entries, and thus nothing to plot.
+    """
     df = pd.DataFrame(fetch_all_data(), columns=("id", "date", "amount", "category", "description"))
     if df.empty:
         return False
@@ -27,9 +38,14 @@ def plot_entries():
     return True
 
 
-def get_summary():
+def get_summary() -> tuple:
+    """
+    Fetches all financial entries and calculates amount sum of Income and Expenses and Net Savings
+    :return:
+        tuple: [0] = Total Income, [1] = Total Expense, [2] = Net Savings
+    """
     df = pd.DataFrame(fetch_all_data(), columns=("id", "date", "amount", "category", "description"))
     total_income = df[df["category"] == "Income"]["amount"].sum()
     total_expense = df[df["category"] == "Expense"]["amount"].sum()
-    net_saving = total_income - total_expense
-    return total_income, total_expense, net_saving
+    net_savings = total_income - total_expense
+    return total_income, total_expense, net_savings

@@ -1,7 +1,7 @@
 import sqlite3
 
 
-def initiate_sql():
+def initiate_sql() -> None:
     conn = None
     try:
         conn = sqlite3.connect('finance_data.db')
@@ -44,7 +44,7 @@ def fetch_all_data():
         return data
 
 
-def insert_row(date, amount, category, description):
+def insert_row(date: str, amount: float, category: str, description: str) -> None:
     conn = None
     try:
         conn = sqlite3.connect('finance_data.db')
@@ -62,7 +62,7 @@ def insert_row(date, amount, category, description):
             conn.close()
 
 
-def delete_row(row_id):
+def delete_row(row_id: int) -> None:
     conn = None
     try:
         conn = sqlite3.connect('finance_data.db')
