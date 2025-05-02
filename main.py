@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from tkcalendar import Calendar
 from sql_functions import fetch_all_data, delete_row, insert_row, initiate_sql
-from data_visualization import plot_entries
+from data_visualization import plot_entries, get_summary
 from data_validation_parsing import (validate_float_input,
                                      parse_date_to_sql, parse_sql_date)
 
@@ -58,6 +58,7 @@ class NewEntryWindow(tk.Toplevel, metaclass=Singleton):
         self._add_entry_button = tk.Button(self, text="Add Entry", command=self.add_entry)
         self._add_entry_button.pack()
 
+
     @staticmethod
     def invalid_input_msg():
         return messagebox.showinfo(title="Wrong Input", message="Enter only numbers")
@@ -77,7 +78,7 @@ class NewEntryWindow(tk.Toplevel, metaclass=Singleton):
             return
         insert_row(parsed_date, self._amount_entry.get(),
                    self._entry_category.get(), self._description_entry.get())
-        self.main_window.load_table()
+        self.main_window.update_main_win_data()
         self.destroy()
 
 
@@ -106,7 +107,22 @@ class App(Tk):
         self._table.heading("category", text="Category")
         self._table.heading("description", text="Description")
         self._table.pack()
+        self._income_label = tk.Label(self, text="All Income: ")
+        self._expense_label = tk.Label(self, text="All Expenses: ")
+        self._net_savings_label = tk.Label(self, text="Net Savings: ")
+        for n in (self._income_label, self._expense_label, self._net_savings_label):
+            n.pack()
+        self.update_main_win_data()
+
+    def update_main_win_data(self):
+        self.update_summary_labels()
         self.load_table()
+
+    def update_summary_labels(self):
+        data_summary = get_summary()
+        self._income_label.config(text=f"All Income: {data_summary[0]}")
+        self._expense_label.config(text=f"All Expenses: {data_summary[1]}")
+        self._net_savings_label.config(text=f" Net Savings: {data_summary[2]}")
 
     @staticmethod
     def try_plotting_entries():
@@ -135,8 +151,8 @@ class App(Tk):
         if confirm:
             row_id = self._table.item(selected_entry[0], "values")
             delete_row(row_id[0])
-            self.load_table()
-            return
+            self.update_main_win_data()
+
 
     def new_entry_window(self):
         return NewEntryWindow(self)

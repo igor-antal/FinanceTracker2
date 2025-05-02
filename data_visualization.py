@@ -20,17 +20,16 @@ def plot_entries():
     plt.plot(expense_df.index, expense_df["amount"], label="Income", color="r")
     plt.xlabel("Date")
     plt.ylabel("Amount")
-    plt.title("Income and Expense Over Time")
+    plt.title("Income and Expenses Over Time")
     plt.legend()
     plt.grid(True)
     plt.show()
-    get_summary()
+    return True
 
 
 def get_summary():
     df = pd.DataFrame(fetch_all_data(), columns=("id", "date", "amount", "category", "description"))
-    total_income = df[df["category" == "Income"]]["amount"].sum()
-    total_expense = df[df["category" == "Expense"]]["amount"].sum()
+    total_income = df[df["category"] == "Income"]["amount"].sum()
+    total_expense = df[df["category"] == "Expense"]["amount"].sum()
     net_saving = total_income - total_expense
     return total_income, total_expense, net_saving
-
