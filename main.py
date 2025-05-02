@@ -3,7 +3,7 @@ from tkinter import *
 import tkinter as tk
 from tkinter import ttk, messagebox
 from tkcalendar import Calendar
-from sql_functions import fetch_all_data, delete_row, insert_row
+from sql_functions import fetch_all_data, delete_row, insert_row, initiate_sql
 from data_visualization import plot_entries
 from data_validation_parsing import (validate_float_input,
                                      parse_date_to_sql, parse_sql_date)
@@ -35,10 +35,10 @@ class NewEntryWindow(tk.Toplevel, metaclass=Singleton):
                                       invalidcommand=self._invalid_input)
         self._amount_entry.pack()
 
-        self._entry_type = ttk.Combobox(self)
-        self._entry_type["values"] = ("Income", "Expense")
-        self._entry_type.current(0)
-        self._entry_type.pack()
+        self._entry_category = ttk.Combobox(self)
+        self._entry_category["values"] = ("Income", "Expense")
+        self._entry_category.current(0)
+        self._entry_category.pack()
 
         self._description_label = tk.Label(self, text="Description")
         self._description_label.pack()
@@ -76,7 +76,7 @@ class NewEntryWindow(tk.Toplevel, metaclass=Singleton):
             print(f"Parsing failed {selected_date}")
             return
         insert_row(parsed_date, self._amount_entry.get(),
-                   self._entry_type.get(), self._description_entry.get())
+                   self._entry_category.get(), self._description_entry.get())
         self.main_window.load_table()
         self.destroy()
 
@@ -84,6 +84,7 @@ class NewEntryWindow(tk.Toplevel, metaclass=Singleton):
 class App(Tk):
     def __init__(self):
         super().__init__()
+        initiate_sql()
 
         self.title("Finance Manager")
         self.geometry("800x600")
@@ -97,14 +98,15 @@ class App(Tk):
                                            command=App.try_plotting_entries)
         self._plot_entries_button.pack()
 
-        self._table = ttk.Treeview(self, columns=("id", "date", "amount", "type", "description"), show="headings")
+        self._table = ttk.Treeview(self, columns=("id", "date", "amount", "category", "description"), show="headings")
         self._table.column("id", width=0, stretch=tk.NO)
         self._table.heading("id", text="")
         self._table.heading("date", text="Date")
         self._table.heading("amount", text="Amount")
-        self._table.heading("type", text="Type")
+        self._table.heading("category", text="Category")
         self._table.heading("description", text="Description")
         self._table.pack()
+        self.load_table()
 
     @staticmethod
     def try_plotting_entries():
@@ -142,5 +144,4 @@ class App(Tk):
 
 if __name__ == "__main__":
     app = App()
-    app.load_table()
     app.mainloop()

@@ -11,7 +11,7 @@ def initiate_sql():
         id INTEGER PRIMARY KEY,
         date TEXT,
         amount REAL,
-        type TEXT,
+        category TEXT,
         description TEXT
         );''')
         conn.commit()
@@ -44,14 +44,14 @@ def fetch_all_data():
         return data
 
 
-def insert_row(date, amount, type, description):
+def insert_row(date, amount, category, description):
     conn = None
     try:
         conn = sqlite3.connect('finance_data.db')
         cursor = conn.cursor()
         cursor.execute('''
-        INSERT INTO finance_entries (date, amount, type, description) VALUES (?, ?, ?, ?)'''
-                       , (date, amount, type, description))
+        INSERT INTO finance_entries (date, amount, category, description) VALUES (?, ?, ?, ?)'''
+                       , (date, amount, category, description))
         conn.commit()
     except sqlite3.Error as error:
         if conn:
