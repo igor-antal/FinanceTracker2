@@ -23,40 +23,49 @@ class NewEntryWindow(tk.Toplevel, metaclass=Singleton):
         super().__init__()
 
         self.main_window = main_window
-        self.geometry("600x600")
+        self.geometry("500x250")
         self.transient(main_window)
 
-        self._amount_label = tk.Label(self, text="Set amount")
-        self._amount_label.pack()
+        right_frame = tk.Frame(self)
+
+        amount_frame = tk.Frame(right_frame)
+        tk.Label(amount_frame, text="Set amount").pack()
         self._validate_float = self.register(validate_float_input)
         self._invalid_input = self.register(NewEntryWindow.invalid_input_msg)
-        self._amount_entry = tk.Entry(self, validate="key",
+        self._amount_entry = tk.Entry(amount_frame, validate="key",
                                       validatecommand=(self._validate_float, "%P"),
                                       invalidcommand=self._invalid_input)
-        self._amount_entry.pack()
+        self._amount_entry.pack(fill="x", pady=(0, 20))
+        amount_frame.pack(fill="x")
 
-        self._entry_category = ttk.Combobox(self)
+        self._entry_category = ttk.Combobox(right_frame)
         self._entry_category["values"] = ("Income", "Expense")
         self._entry_category.current(0)
-        self._entry_category.pack()
+        self._entry_category.pack(fill="x", pady=(0, 10))
 
-        self._description_label = tk.Label(self, text="Description")
-        self._description_label.pack()
-        self._description_entry = tk.Entry(self)
-        self._description_entry.pack()
+        description_frame = tk.Frame(right_frame)
+        tk.Label(description_frame, text="Description").pack()
+        self._description_entry = tk.Entry(description_frame)
+        self._description_entry.pack(fill="x", pady=(0, 10))
+        description_frame.pack(fill="x")
 
+        (tk.Button(right_frame, text="Add Entry", command=self.add_entry)
+         .pack(side="bottom", pady=(0, 20)))
+
+        right_frame.pack(side="right", fill="y", pady=(15, 0), padx=(0, 15))
+
+        left_frame = tk.Frame(self)
         self._today = datetime.today().timetuple()[:3]
-        self._calendar = Calendar(self, selectmode="day",
+        self._calendar = Calendar(left_frame, selectmode="day",
                                   year=self._today[0], month=self._today[1], day=self._today[2],
                                   date_pattern="dd/mm/yyyy")
         self._calendar.pack()
 
-        self._date_label = tk.Label(self, text=f"Selected date: {self._calendar.get_date()}")
-        self._date_label.pack()
+        self._date_label = tk.Label(left_frame, text=f"Selected date: {self._calendar.get_date()}")
+        self._date_label.pack(pady=(15, 0))
         self._calendar.bind("<<CalendarSelected>>", self.update_date_label)
 
-        self._add_entry_button = tk.Button(self, text="Add Entry", command=self.add_entry)
-        self._add_entry_button.pack()
+        left_frame.pack(side="left", fill="y", pady=(15, 0), padx=(15, 0))
 
     @staticmethod
     def invalid_input_msg():
@@ -75,7 +84,7 @@ class NewEntryWindow(tk.Toplevel, metaclass=Singleton):
         except ValueError:
             print(f"Parsing failed {selected_date}")
             return
-        insert_row(parsed_date, self._amount_entry.get(),
+        insert_row(parsed_date, float(self._amount_entry.get()),
                    self._entry_category.get(), self._description_entry.get())
         self.main_window.update_main_win_data()
         self.destroy()
