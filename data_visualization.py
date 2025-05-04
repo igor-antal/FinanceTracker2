@@ -27,8 +27,21 @@ def plot_entries() -> bool:
     expense_df.index = expense_df.index.strftime("%d/%m/%Y")
 
     plt.figure(figsize=(10, 5))
-    plt.plot(income_df.index, income_df["amount"], label="Income", color="g")
-    plt.plot(expense_df.index, expense_df["amount"], label="Income", color="r")
+
+    if income_df["amount"].max() != 0:
+        ax_income = plt.gca()
+        ax_income.plot(income_df.index, income_df["amount"], label="Income", color="g", marker="o")
+        for index, row in income_df.iterrows():
+            ax_income.annotate(f"{row['amount']}", xy=(index, row["amount"]),
+                               xytext=(5, 5), textcoords="offset points")
+
+    if expense_df["amount"].max() != 0:
+        ax_expense = plt.gca()
+        ax_expense.plot(expense_df.index, expense_df["amount"], label="Income", color="r", marker="o")
+        for index, row in expense_df.iterrows():
+            ax_expense.annotate(f"{row['amount']}", xy=(index, row["amount"])
+                                , xytext=(5, 5), textcoords="offset points")
+
     plt.xlabel("Date")
     plt.ylabel("Amount")
     plt.title("Income and Expenses Over Time")
