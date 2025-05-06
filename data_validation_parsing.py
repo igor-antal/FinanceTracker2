@@ -1,17 +1,6 @@
 from datetime import datetime
 
 
-def parse_date_to_sql(date: str) -> str:
-    """
-        Parses date string into sqlite support date string format.
-        :param date: Date string in day/month/year format.
-        :return:
-            str: Date string in year/month/day format.
-    """
-    date = datetime.strptime(date, "%d/%m/%Y")
-    return datetime.strftime(date, "%Y-%m-%d")
-
-
 def validate_float_input(user_input: str) -> bool:
     """
     Validating function for tkinter Entry field. Checks if users input is float or not.
@@ -36,6 +25,26 @@ def parse_sql_date(date: str) -> str:
         :param date: Date string in year/month/day format.
         :return:
             str: Date string in day/month/year format.
+        :raises ValueError: If date string is in wrong format.
     """
-    date = datetime.strptime(date, "%Y-%m-%d")
-    return datetime.strftime(date, "%d/%m/%Y")
+    try:
+        date = datetime.strptime(date, "%Y-%m-%d")
+        return datetime.strftime(date, "%d/%m/%Y")
+    except ValueError as error:
+        print(f"{error}")
+
+
+def parse_date_to_sql(date: str) -> str:
+    """
+        Parses date string into sqlite support date string format.
+        :param date: Date string in day/month/year format.
+        :return:
+            str: Date string in year/month/day format.
+        :raises Value Error: If date string is in wrong format
+
+    """
+    try:
+        date = datetime.strptime(date, "%d/%m/%Y")
+        return datetime.strftime(date, "%Y-%m-%d")
+    except ValueError as error:
+        print(f"{error}")
