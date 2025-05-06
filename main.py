@@ -52,7 +52,7 @@ class NewEntryWindow(tk.Toplevel, metaclass=Singleton):
         (tk.Button(right_frame, text="Add Entry", command=self.add_entry)
          .pack(side="bottom", pady=(0, 20)))
 
-        right_frame.pack(side="right", fill="y", pady=(15, 0), padx=(0, 15))
+        right_frame.pack(side="right", fill="y", pady=(15, 0), padx=(0, 20))
 
         left_frame = tk.Frame(self)
         self._today = datetime.today().timetuple()[:3]
@@ -96,16 +96,8 @@ class App(Tk):
         initiate_sql()
 
         self.title("Finance Manager")
-        self.geometry("800x600")
-        self.config(background="#fff6f2")
-
-        self._delete_entry_button = Button(self, text="Delete Entry", command=self.delete_entry)
-        self._delete_entry_button.pack()
-        self._new_entry_button = Button(self, text="New Entry", command=self.new_entry_window)
-        self._new_entry_button.pack()
-        self._plot_entries_button = Button(self, text="Plot Entries",
-                                           command=App.try_plotting_entries)
-        self._plot_entries_button.pack()
+        self.geometry("800x400")
+        self.resizable(width=False, height=False)
 
         self._table = ttk.Treeview(self, columns=("id", "date", "amount", "category", "description"), show="headings")
         self._table.column("id", width=0, stretch=tk.NO)
@@ -115,11 +107,22 @@ class App(Tk):
         self._table.heading("category", text="Category")
         self._table.heading("description", text="Description")
         self._table.pack()
-        self._income_label = tk.Label(self, text="All Income: ")
-        self._expense_label = tk.Label(self, text="All Expenses: ")
-        self._net_savings_label = tk.Label(self, text="Net Savings: ")
-        for n in (self._income_label, self._expense_label, self._net_savings_label):
-            n.pack()
+
+        buttons_frame = tk.Frame(self)
+        Button(buttons_frame, text="Delete Entry", command=self.delete_entry).grid(column=1, row=0, padx=(20, 0))
+        Button(buttons_frame, text="New Entry", command=self.new_entry_window).grid(column=0, row=0)
+        Button(buttons_frame, text="Plot Entries", command=App.try_plotting_entries).grid(column=2, row=0, padx=(20, 0))
+        buttons_frame.pack(side="left", fill="y", pady=15, padx=(15, 0))
+
+        summary_frame = tk.Frame(self)
+        self._income_label = tk.Label(summary_frame, text="All Income: ")
+        self._income_label.pack()
+        self._expense_label = tk.Label(summary_frame, text="All Expenses: ")
+        self._expense_label.pack()
+        self._net_savings_label = tk.Label(summary_frame, text="Net Savings: ")
+        self._net_savings_label.pack()
+        summary_frame.pack(side="right", fill="y", pady=15, padx=(0, 15))
+
         self.update_main_win_data()
 
     def update_main_win_data(self):
@@ -141,13 +144,9 @@ class App(Tk):
     def load_table(self):
         for item in self._table.get_children():
             self._table.delete(item)
-        for row in fetch_all_data():
+        for row in fetch_all_data()[::-1]:
             modified_row = list(row)
-            try:
-                modified_row[1] = parse_sql_date(row[1])
-            except ValueError:
-                print(f"Parsing failed {modified_row[1]}")
-                return
+            modified_row[1] = parse_sql_date(row[1])
             self._table.insert('', tk.END, values=modified_row)
 
     def delete_entry(self):
